@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholarship & Financial Aid Tracker</title>
+<style>
+:root{
+  --bg:#F4F6F7; --card:#FFFFFF; --ink:#1B2A36; --ink2:#31485A; --grey:#5A6B78;
+  --rule:#E2E6E9; --soft:#F7F8F9; --acc:#0F7B6C; --accL:#E6F2F0;
+  --ok:#12B76A; --warn:#B9770E; --bad:#C0392B; --navy:#2E5C8A;
+}
+[data-dark="1"]{
+  --bg:#121A1E; --card:#182226; --ink:#EDEFEF; --ink2:#C7D0D3; --grey:#8FA0A7;
+  --rule:#28343A; --soft:#1B262B; --accL:#173832;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);}
+.app{max-width:1200px;margin:0 auto;}
+header.top{background:var(--card);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:10;}
+.toprow{display:flex;align-items:center;gap:20px;padding:14px 22px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:bold;font-size:19px;}
+.brand .box{width:22px;height:22px;border:3px solid var(--acc);border-radius:6px;}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;}
+nav.tabs button{background:none;border:none;padding:9px 13px;border-radius:8px;font-size:14px;font-weight:bold;color:var(--grey);cursor:pointer;}
+nav.tabs button.active{background:var(--accL);color:var(--acc);}
+.spacer{flex:1;}
+.iconbtn{background:none;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;cursor:pointer;color:var(--ink2);font-size:13px;font-weight:bold;}
+main{padding:22px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:900px){.grid4{grid-template-columns:1fr 1fr;}.grid3{grid-template-columns:1fr 1fr;}.grid2{grid-template-columns:1fr;}}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:18px;}
+.kpi .label{font-size:12px;font-weight:bold;color:var(--grey);letter-spacing:.03em;text-transform:uppercase;}
+.kpi .val{font-size:28px;font-weight:bold;margin:6px 0 2px;}
+.kpi .sub{font-size:12px;color:var(--grey);}
+h2{font-size:19px;margin:0 0 4px;}
+p.hint{font-size:13px;color:var(--grey);margin:0 0 14px;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--grey);padding:8px 10px;border-bottom:1px solid var(--rule);}
+td{padding:10px;border-bottom:1px solid var(--rule);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:bold;}
+.pill.ok{background:var(--accL);color:var(--acc);}
+.pill.low{background:#FCE8CB;color:var(--warn);}
+.pill.out{background:#F5D9D6;color:var(--bad);}
+.pill.archived{background:var(--soft);color:var(--grey);}
+.btn{background:var(--acc);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:bold;font-size:14px;cursor:pointer;}
+.btn.ghost{background:none;border:1px solid var(--rule);color:var(--ink2);}
+.btn.small{padding:6px 10px;font-size:12px;border-radius:6px;}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+input,select,textarea{font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--rule);border-radius:7px;background:var(--soft);color:var(--ink);width:100%;}
+label{font-size:12px;font-weight:bold;color:var(--grey);display:block;margin-bottom:4px;}
+.field{margin-bottom:12px;}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-bg{position:fixed;inset:0;background:rgba(10,15,18,.5);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow:auto;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--card);border-radius:12px;padding:24px;max-width:560px;width:100%;}
+.modal h3{margin-top:0;}
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--rule);}
+.list-item:last-child{border-bottom:none;}
+.empty{color:var(--grey);font-size:13px;padding:20px 0;text-align:center;}
+footer.note{font-size:12px;color:var(--grey);text-align:center;padding:20px;}
+.checkrow{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--rule);}
+.checkrow:last-child{border-bottom:none;}
+.checkrow input[type=checkbox]{width:auto;margin-top:3px;}
+.checkrow.done label{text-decoration:line-through;color:var(--grey);}
+.barrow{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.barrow .lbl{width:150px;font-size:12px;color:var(--grey);flex-shrink:0;}
+.barrow .track{flex:1;height:16px;background:var(--soft);border-radius:5px;overflow:hidden;}
+.barrow .fill{height:100%;background:var(--navy);}
+.barrow .amt{width:70px;text-align:right;font-size:12px;font-weight:bold;flex-shrink:0;}
+.demo-banner{position:sticky;top:0;z-index:9999;background:#B9770E;color:#fff;font:600 13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-align:center;padding:9px 14px}
+.demo-banner a{color:#fff;text-decoration:underline}
+.demo-banner .x{position:absolute;right:10px;top:6px;background:none;border:none;color:#fff;font:inherit;cursor:pointer;opacity:.85;padding:4px 8px}
+.demo-banner .x:hover{opacity:1}
+</style>
+</head>
+<body>
+<div class="demo-banner" id="demoBanner">DEMO — example data, add up to 15 of your own scholarships and see whether it thinks the way you do. Nothing is saved permanently and it can reset any time. <a href="https://www.etsy.com/shop/LedgerLoopStudio" target="_blank" rel="noopener">Buy the full version</a> for your own unlimited, permanent copy.<button class="x" onclick="document.getElementById('demoBanner').style.display='none'" aria-label="Dismiss">✕</button></div>
+<div class="app" id="app"></div>
+
+<script id="engine">
+/* ===================== PURE FUNCTIONS (unit-testable) ===================== */
+function pad2(n){ return n<10 ? "0"+n : ""+n; }
+function toISO(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+function parseISO(s){
+  if(!s) return null;
+  var p = String(s).split("-");
+  if(p.length!==3) return null;
+  var y=parseInt(p[0],10), m=parseInt(p[1],10), d=parseInt(p[2],10);
+  if(!y||!m||!d) return null;
+  return new Date(y, m-1, d);
+}
+function todayISO(){ return toISO(new Date()); }
+function uid(){ return "s" + Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
+function round1(n){ return Math.round((Number(n)||0)*10)/10; }
+function daysUntil(fromISO, targetISO){
+  var a = parseISO(fromISO), b = parseISO(targetISO);
+  if(!a || !b) return null;
+  return Math.round((b-a)/86400000);
+}
+function urgencyLevel(fromISO, deadlineISO){
+  var d = daysUntil(fromISO, deadlineISO);
+  if(d === null) return "none";
+  if(d < 0) return "overdue";
+  if(d <= 7) return "urgent";
+  if(d <= 30) return "soon";
+  return "later";
+}
+
+/* ---- scholarships ---- */
+function scholarshipById(scholarships, id){
+  return (scholarships||[]).filter(function(s){ return s.id===id; })[0] || null;
+}
+function scholarshipsByStatus(scholarships, status){
+  return (scholarships||[]).filter(function(s){ return s.status===status; });
+}
+function activeScholarships(scholarships){
+  return (scholarships||[]).filter(function(s){ return s.status!=="rejected" && s.status!=="expired"; });
+}
+function upcomingDeadlines(scholarships, fromISO, withinDays){
+  return (scholarships||[])
+    .filter(function(s){
+      if(!s.deadline) return false;
+      if(s.status==="awarded" || s.status==="rejected" || s.status==="expired") return false;
+      var d = daysUntil(fromISO, s.deadline);
+      return d !== null && d >= 0 && d <= withinDays;
+    })
+    .slice().sort(function(a,b){ return a.deadline < b.deadline ? -1 : 1; });
+}
+function overdueScholarships(scholarships, fromISO){
+  return (scholarships||[]).filter(function(s){
+    if(!s.deadline) return false;
+    if(s.status==="awarded" || s.status==="rejected" || s.status==="expired" || s.status==="submitted") return false;
+    var d = daysUntil(fromISO, s.deadline);
+    return d !== null && d < 0;
+  });
+}
+function totalPotentialAward(scholarships){
+  return activeScholarships(scholarships).reduce(function(sum,s){ return sum + (Number(s.awardAmount)||0); }, 0);
+}
+function totalWon(scholarships){
+  return scholarshipsByStatus(scholarships,"awarded").reduce(function(sum,s){ return sum + (Number(s.awardAmount)||0); }, 0);
+}
+function winRate(scholarships){
+  var decided = (scholarships||[]).filter(function(s){ return s.status==="awarded" || s.status==="rejected"; });
+  if(!decided.length) return null;
+  var won = decided.filter(function(s){ return s.status==="awarded"; }).length;
+  return round1((won/decided.length)*100);
+}
+function scholarshipCountByStatus(scholarships){
+  var statuses = ["researching","started","submitted","awarded","rejected","expired"];
+  var out = {};
+  statuses.forEach(function(s){ out[s] = scholarshipsByStatus(scholarships, s).length; });
+  return out;
+}
+
+/* ---- requirements checklist ---- */
+function requirementsForScholarship(requirements, scholarshipId){
+  return (requirements||[]).filter(function(r){ return r.scholarshipId===scholarshipId; });
+}
+function requirementsCompletionPct(requirements, scholarshipId){
+  var items = requirementsForScholarship(requirements, scholarshipId);
+  if(!items.length) return null;
+  var done = items.filter(function(r){ return r.done; }).length;
+  return round1((done/items.length)*100);
+}
+function allRequirementsDone(requirements, scholarshipId){
+  var items = requirementsForScholarship(requirements, scholarshipId);
+  return items.length > 0 && items.every(function(r){ return r.done; });
+}
+
+/* ---- essays ---- */
+function essaysByStatus(essays, status){
+  return (essays||[]).filter(function(e){ return e.status===status; });
+}
+function essayCountByStatus(essays){
+  var statuses = ["outline","draft","final"];
+  var out = {};
+  statuses.forEach(function(s){ out[s] = essaysByStatus(essays, s).length; });
+  return out;
+}
+function essaysForScholarship(essays, scholarshipId){
+  return (essays||[]).filter(function(e){ return (e.scholarshipIds||[]).indexOf(scholarshipId) !== -1; });
+}
+
+/* ---- financial aid ---- */
+function aidByStatus(aidItems, status){
+  return (aidItems||[]).filter(function(a){ return a.status===status; });
+}
+function aidCountByStatus(aidItems){
+  var statuses = ["not-started","in-progress","submitted","received"];
+  var out = {};
+  statuses.forEach(function(s){ out[s] = aidByStatus(aidItems, s).length; });
+  return out;
+}
+
+/* ---- reports ---- */
+function monthKey(iso){ return iso ? iso.slice(0,7) : ""; }
+function scholarshipsDecidedInMonth(scholarships, mKey){
+  return (scholarships||[]).filter(function(s){
+    return (s.status==="awarded" || s.status==="rejected") && s.decidedDate && monthKey(s.decidedDate)===mKey;
+  });
+}
+function summaryReport(state){
+  var scholarships = state.scholarships || [], requirements = state.requirements || [],
+      essays = state.essays || [], aidItems = state.aidItems || [];
+  return {
+    tracked: (scholarships||[]).length,
+    active: activeScholarships(scholarships).length,
+    potentialAward: totalPotentialAward(scholarships),
+    won: totalWon(scholarships),
+    winRate: winRate(scholarships),
+    essaysFinal: essaysByStatus(essays,"final").length,
+    aidSubmitted: aidByStatus(aidItems,"submitted").length + aidByStatus(aidItems,"received").length
+  };
+}
+
+/* ---- CSV export ---- */
+function toCSV(scholarships){
+  var rows = [["Name","Provider","Award amount","Deadline","Status","Requirements %","Notes"]];
+  (scholarships||[]).forEach(function(s){
+    rows.push([s.name, s.provider||"", s.awardAmount||0, s.deadline||"", s.status||"", "", s.notes||""]);
+  });
+  return rows.map(function(r){
+    return r.map(function(c){
+      var str = String(c);
+      return /[",\n]/.test(str) ? '"'+str.replace(/"/g,'""')+'"' : str;
+    }).join(",");
+  }).join("\n");
+}
+
+if(typeof module !== "undefined" && module.exports){
+  module.exports = {
+    pad2, toISO, parseISO, todayISO, uid, round1, daysUntil, urgencyLevel,
+    scholarshipById, scholarshipsByStatus, activeScholarships, upcomingDeadlines,
+    overdueScholarships, totalPotentialAward, totalWon, winRate, scholarshipCountByStatus,
+    requirementsForScholarship, requirementsCompletionPct, allRequirementsDone,
+    essaysByStatus, essayCountByStatus, essaysForScholarship,
+    aidByStatus, aidCountByStatus,
+    monthKey, scholarshipsDecidedInMonth, summaryReport, toCSV
+  };
+}
+</script>
+
+<script id="uiapp">
+(function(){
+"use strict";
+var KEY = "llsScholarshipTracker_v1";
+/* ---- demo-only limit: this block exists only in the public try-it demo, never in the sold product ---- */
+var DEMO_MODE = true, DEMO_SCHOLARSHIP_LIMIT = 19; /* 4 seeded + 15 room to try adding your own */
+function demoLimitReached(){
+  if(!DEMO_MODE) return false;
+  if(!STATE || !STATE.scholarships || STATE.scholarships.length < DEMO_SCHOLARSHIP_LIMIT) return false;
+  alert("You've reached the "+DEMO_SCHOLARSHIP_LIMIT+"-scholarship demo limit.\n\nThis is just a preview — buy the full version for unlimited scholarships, all features unlocked, and your own permanent copy.");
+  return true;
+}
+
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return null;
+    var st = JSON.parse(raw);
+    if(!st || !st.scholarships) return null;
+    return st;
+  }catch(e){ return null; }
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(STATE)); }catch(e){} }
+
+function seedSample(){
+  var today = todayISO();
+  var t = parseISO(today);
+  function iso(offsetDays){ var d = new Date(t.getFullYear(), t.getMonth(), t.getDate()+offsetDays); return toISO(d); }
+  var s1 = uid(), s2 = uid(), s3 = uid(), s4 = uid();
+  var scholarships = [
+    { id:s1, name:"Regional STEM Excellence Award", provider:"State University Foundation", awardAmount:2500, deadline: iso(5), status:"started", notes:"Needs 2 letters of recommendation" },
+    { id:s2, name:"First-Generation Student Grant", provider:"Community Trust Fund", awardAmount:1500, deadline: iso(21), status:"researching", notes:"" },
+    { id:s3, name:"Local Rotary Club Scholarship", provider:"Rotary Club of Millbrook", awardAmount:1000, deadline: iso(-10), status:"submitted", notes:"Submitted early" },
+    { id:s4, name:"National Merit Community Award", provider:"National Merit Foundation", awardAmount:5000, deadline: iso(-40), status:"awarded", decidedDate: iso(-35), notes:"Awarded in full" }
+  ];
+  var requirements = [
+    { id:uid(), scholarshipId:s1, text:"Official transcript", done:true },
+    { id:uid(), scholarshipId:s1, text:"Two letters of recommendation", done:false },
+    { id:uid(), scholarshipId:s1, text:"Personal statement (500 words)", done:false },
+    { id:uid(), scholarshipId:s3, text:"Official transcript", done:true },
+    { id:uid(), scholarshipId:s3, text:"Community service log", done:true }
+  ];
+  var essays = [
+    { id:uid(), title:"Why I want to study engineering", scholarshipIds:[s1], targetWords:500, currentWords:320, status:"draft", notes:"" },
+    { id:uid(), title:"Community service reflection", scholarshipIds:[s3], targetWords:400, currentWords:400, status:"final", notes:"" }
+  ];
+  var aidItems = [
+    { id:uid(), name:"FAFSA "+String(new Date().getFullYear()+1), deadline: iso(60), status:"in-progress", notes:"" },
+    { id:uid(), name:"State Grant Application", deadline: iso(30), status:"not-started", notes:"" }
+  ];
+  return {
+    settings: { dark:false },
+    scholarships: scholarships, requirements: requirements, essays: essays, aidItems: aidItems
+  };
+}
+
+var STATE = load() || seedSample();
+if(!load()) save();
+
+var VIEW = "dash";
+var MODAL_OPEN = false;
+var EDIT_ID = null;
+var REQ_SCHOLARSHIP_ID = null;
+
+function el(tag, attrs, kids){
+  var e = document.createElement(tag);
+  attrs = attrs || {};
+  Object.keys(attrs).forEach(function(k){
+    if(k === "class") e.className = attrs[k];
+    else if(k === "html") e.innerHTML = attrs[k];
+    else if(k.slice(0,2) === "on") e.addEventListener(k.slice(2), attrs[k]);
+    else if(attrs[k] !== undefined) e.setAttribute(k, attrs[k]);
+  });
+  (kids||[]).forEach(function(k){ if(k) e.appendChild(typeof k === "string" ? document.createTextNode(k) : k); });
+  return e;
+}
+
+var TABS = [
+  ["dash","Dashboard"], ["scholarships","Scholarships"], ["requirements","Requirements"],
+  ["essays","Essays"], ["deadlines","Deadlines"], ["aid","Financial Aid"],
+  ["awards","Awards & Outcomes"], ["reports","Reports"]
+];
+
+function render(){
+  document.body.setAttribute("data-dark", STATE.settings.dark ? "1" : "0");
+  var app = document.getElementById("app");
+  app.innerHTML = "";
+  app.appendChild(renderHeader());
+  var main = el("main", {}, []);
+  if(VIEW === "dash") main.appendChild(viewDash());
+  else if(VIEW === "scholarships") main.appendChild(viewScholarships());
+  else if(VIEW === "requirements") main.appendChild(viewRequirements());
+  else if(VIEW === "essays") main.appendChild(viewEssays());
+  else if(VIEW === "deadlines") main.appendChild(viewDeadlines());
+  else if(VIEW === "aid") main.appendChild(viewAid());
+  else if(VIEW === "awards") main.appendChild(viewAwards());
+  else if(VIEW === "reports") main.appendChild(viewReports());
+  app.appendChild(main);
+  app.appendChild(renderFooter());
+  showModal();
+}
+
+function renderHeader(){
+  var nav = el("nav", { class:"tabs" }, TABS.map(function(tb){
+    return el("button", { class:(VIEW===tb[0]?"active ":"")+"", onclick:function(){ VIEW = tb[0]; render(); } }, [tb[1]]);
+  }));
+  return el("header", { class:"top" }, [
+    el("div", { class:"toprow" }, [
+      el("div", { class:"brand" }, [ el("span",{class:"box"},[]), "Scholarship Tracker" ]),
+      nav,
+      el("div", { class:"spacer" }, []),
+      el("button", { class:"iconbtn", onclick:function(){ STATE.settings.dark = !STATE.settings.dark; save(); render(); } }, [ STATE.settings.dark ? "Light mode" : "Dark mode" ])
+    ])
+  ]);
+}
+function renderFooter(){
+  return el("footer", { class:"note" }, ["LedgerLoopStudio — Scholarship & Financial Aid Tracker. Your data stays in this browser."]);
+}
+function kpi(label,val,sub){
+  return el("div", { class:"card kpi" }, [
+    el("div", { class:"label" }, [label]),
+    el("div", { class:"val" }, [val]),
+    el("div", { class:"sub" }, [sub])
+  ]);
+}
+function th(t){ return el("th", {}, [t]); }
+function td(t){ return el("td", {}, [t]); }
+function money(n){ return "$"+(Number(n)||0).toLocaleString(); }
+function urgencyPill(level){
+  var map = { overdue:["out","overdue"], urgent:["low","due this week"], soon:["ok","due this month"], later:["archived","later"], none:["archived","no deadline"] };
+  var m = map[level] || map.none;
+  return el("span",{class:"pill "+m[0]},[m[1]]);
+}
+
+/* ---------------------------------------------------------------- DASHBOARD */
+function viewDash(){
+  var rep = summaryReport(STATE);
+  var upcoming = upcomingDeadlines(STATE.scholarships, todayISO(), 30);
+  var overdue = overdueScholarships(STATE.scholarships, todayISO());
+
+  var kpis = el("div", { class:"grid4" }, [
+    kpi("Scholarships tracked", String(rep.tracked), rep.active+" still active"),
+    kpi("Potential award value", money(rep.potentialAward), "across active applications"),
+    kpi("Won so far", money(rep.won), rep.winRate===null?"no decisions yet":rep.winRate+"% win rate"),
+    kpi("Essays finalized", String(rep.essaysFinal), "of "+STATE.essays.length+" total")
+  ]);
+
+  var deadlineCard = el("div", { class:"card" }, [
+    el("h2", {}, ["Deadlines in the next 30 days"]),
+    el("p", { class:"hint" }, ["Sorted soonest first. Overdue applications are flagged separately below."]),
+    upcoming.length ? el("table", {}, [
+      el("thead", {}, [el("tr", {}, [th("Scholarship"),th("Award"),th("Deadline"),th("Status")])]),
+      el("tbody", {}, upcoming.slice(0,6).map(function(s){
+        return el("tr", {}, [td(s.name), td(money(s.awardAmount)), td(s.deadline), el("td",{},[urgencyPill(urgencyLevel(todayISO(), s.deadline))])]);
+      }))
+    ]) : el("div", { class:"empty" }, ["Nothing due in the next 30 days."])
+  ]);
+
+  var overdueCard = el("div", { class:"card" }, [
+    el("h2", {}, ["Needs attention"]),
+    overdue.length ? el("div", {}, overdue.map(function(s){
+      return el("div", { class:"list-item" }, [el("span",{},[s.name+" — deadline "+s.deadline]), el("span",{class:"pill out"},["overdue"])]);
+    })) : el("div", { class:"empty" }, ["Nothing overdue. You're on track."])
+  ]);
+
+  return el("div", {}, [kpis, el("div", { class:"grid2" }, [deadlineCard, overdueCard])]);
+}
+
+/* ---------------------------------------------------------------- SCHOLARSHIPS */
+function viewScholarships(){
+  var list = STATE.scholarships.slice();
+  return el("div", {}, [
+    el("div", { class:"row" }, [
+      el("div", {}, [el("h2",{},["Scholarship pipeline"]), el("p",{class:"hint"},["Every scholarship you're pursuing, its award value, deadline and status."])]),
+      el("div", {}, [
+        el("button", { class:"btn ghost", onclick:function(){ downloadCSV(); } }, ["Export CSV"]),
+        " ",
+        el("button", { class:"btn", onclick:function(){ EDIT_ID=null; MODAL_OPEN="scholarship"; render(); } }, ["+ Add scholarship"])
+      ])
+    ]),
+    list.length ? el("table", {}, [
+      el("thead", {}, [el("tr", {}, [th("Name"),th("Provider"),th("Award"),th("Deadline"),th("Status"),th("Requirements"),th("")])]),
+      el("tbody", {}, list.map(function(s){
+        var pct = requirementsCompletionPct(STATE.requirements, s.id);
+        var pillClass = { researching:"archived", started:"low", submitted:"ok", awarded:"ok", rejected:"out", expired:"archived" }[s.status] || "archived";
+        return el("tr", {}, [
+          td(s.name), td(s.provider||"—"), td(money(s.awardAmount)), td(s.deadline||"—"),
+          el("td",{},[el("span",{class:"pill "+pillClass},[s.status])]),
+          td(pct===null?"—":pct+"%"),
+          el("td",{},[el("button",{class:"btn ghost small", onclick:function(){ EDIT_ID=s.id; MODAL_OPEN="scholarship"; render(); }},["Edit"])])
+        ]);
+      }))
+    ]) : el("div", { class:"empty" }, ["No scholarships yet. Add the first one you're pursuing."])
+  ]);
+}
+function downloadCSV(){
+  var csv = toCSV(STATE.scholarships);
+  var blob = new Blob([csv], {type:"text/csv"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = "scholarships.csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ---------------------------------------------------------------- REQUIREMENTS */
+function viewRequirements(){
+  if(!REQ_SCHOLARSHIP_ID && STATE.scholarships.length) REQ_SCHOLARSHIP_ID = STATE.scholarships[0].id;
+  var sch = scholarshipById(STATE.scholarships, REQ_SCHOLARSHIP_ID);
+  var items = REQ_SCHOLARSHIP_ID ? requirementsForScholarship(STATE.requirements, REQ_SCHOLARSHIP_ID) : [];
+  return el("div", {}, [
+    el("div", { class:"row" }, [
+      el("div", {}, [el("h2",{},["Requirements checklist"]), el("p",{class:"hint"},["Transcripts, letters, essays — tracked per scholarship so nothing is missed."])]),
+      el("button", { class:"btn", onclick:function(){ EDIT_ID=null; MODAL_OPEN="requirement"; render(); } }, ["+ Add requirement"])
+    ]),
+    el("div", { class:"field", style:"max-width:360px;" }, [
+      el("label",{},["Scholarship"]),
+      el("select",{onchange:function(e){ REQ_SCHOLARSHIP_ID=e.target.value; render(); }}, STATE.scholarships.map(function(s){
+        return el("option",{value:s.id, selected:REQ_SCHOLARSHIP_ID===s.id?"selected":undefined},[s.name]);
+      }))
+    ]),
+    sch ? el("div", { class:"card" }, items.length ? items.map(function(r){
+      return el("div", { class:"checkrow"+(r.done?" done":"") }, [
+        el("input", { type:"checkbox", checked: r.done?"checked":undefined, onchange:function(e){ r.done = e.target.checked; save(); render(); } }),
+        el("label", {}, [r.text]),
+        el("button", { class:"btn ghost small", onclick:function(){ STATE.requirements = STATE.requirements.filter(function(x){return x.id!==r.id;}); save(); render(); } }, ["Remove"])
+      ]);
+    }) : [el("div",{class:"empty"},["No requirements logged for this scholarship yet."])]) : el("div", { class:"empty" }, ["Add a scholarship first."])
+  ]);
+}
+
+/* ---------------------------------------------------------------- ESSAYS */
+function viewEssays(){
+  var essays = STATE.essays.slice();
+  var counts = essayCountByStatus(STATE.essays);
+  return el("div", {}, [
+    el("div", { class:"row" }, [
+      el("div", {}, [el("h2",{},["Essays & personal statements"]), el("p",{class:"hint"},["Outline: "+counts.outline+" · Draft: "+counts.draft+" · Final: "+counts.final])]),
+      el("button", { class:"btn", onclick:function(){ EDIT_ID=null; MODAL_OPEN="essay"; render(); } }, ["+ Add essay"])
+    ]),
+    essays.length ? el("table", {}, [
+      el("thead", {}, [el("tr", {}, [th("Title"),th("Linked scholarships"),th("Word count"),th("Status"),th("")])]),
+      el("tbody", {}, essays.map(function(e){
+        var linked = (e.scholarshipIds||[]).map(function(id){ var s=scholarshipById(STATE.scholarships,id); return s?s.name:null; }).filter(Boolean).join(", ") || "—";
+        var pillClass = e.status==="final"?"ok":e.status==="draft"?"low":"archived";
+        return el("tr", {}, [
+          td(e.title), td(linked), td((e.currentWords||0)+" / "+(e.targetWords||0)),
+          el("td",{},[el("span",{class:"pill "+pillClass},[e.status])]),
+          el("td",{},[el("button",{class:"btn ghost small", onclick:function(){ EDIT_ID=e.id; MODAL_OPEN="essay"; render(); }},["Edit"])])
+        ]);
+      }))
+    ]) : el("div", { class:"empty" }, ["No essays logged yet."])
+  ]);
+}
+
+/* ---------------------------------------------------------------- DEADLINES */
+function viewDeadlines(){
+  var upcoming = upcomingDeadlines(STATE.scholarships, todayISO(), 365);
+  var overdue = overdueScholarships(STATE.scholarships, todayISO());
+  return el("div", {}, [
+    el("h2", {}, ["Deadline calendar"]),
+    el("p", { class:"hint" }, ["Every active scholarship with a deadline, soonest first."]),
+    overdue.length ? el("div",{class:"card", style:"margin-bottom:14px;"},[
+      el("h2",{},["Overdue"]),
+      el("div",{}, overdue.map(function(s){ return el("div",{class:"list-item"},[el("span",{},[s.name]), el("span",{class:"pill out"},[s.deadline])]); }))
+    ]) : null,
+    el("div", { class:"card" }, upcoming.length ? [
+      el("table", {}, [
+        el("thead", {}, [el("tr", {}, [th("Scholarship"),th("Deadline"),th("Urgency"),th("Award")])]),
+        el("tbody", {}, upcoming.map(function(s){
+          return el("tr", {}, [td(s.name), td(s.deadline), el("td",{},[urgencyPill(urgencyLevel(todayISO(), s.deadline))]), td(money(s.awardAmount))]);
+        }))
+      ])
+    ] : [el("div",{class:"empty"},["No upcoming deadlines."])])
+  ]);
+}
+
+/* ---------------------------------------------------------------- FINANCIAL AID */
+function viewAid(){
+  var items = STATE.aidItems.slice();
+  var counts = aidCountByStatus(STATE.aidItems);
+  return el("div", {}, [
+    el("div", { class:"row" }, [
+      el("div", {}, [el("h2",{},["Financial aid (separate from merit scholarships)"]), el("p",{class:"hint"},["FAFSA, state grants and need-based aid — tracked on their own timeline. Not started: "+counts["not-started"]+" · In progress: "+counts["in-progress"]+" · Submitted: "+counts.submitted+" · Received: "+counts.received])]),
+      el("button", { class:"btn", onclick:function(){ EDIT_ID=null; MODAL_OPEN="aid"; render(); } }, ["+ Add aid application"])
+    ]),
+    items.length ? el("table", {}, [
+      el("thead", {}, [el("tr", {}, [th("Name"),th("Deadline"),th("Status"),th("")])]),
+      el("tbody", {}, items.map(function(a){
+        var pillClass = { "not-started":"archived", "in-progress":"low", submitted:"ok", received:"ok" }[a.status] || "archived";
+        return el("tr", {}, [
+          td(a.name), td(a.deadline||"—"),
+          el("td",{},[el("span",{class:"pill "+pillClass},[a.status])]),
+          el("td",{},[el("button",{class:"btn ghost small", onclick:function(){ EDIT_ID=a.id; MODAL_OPEN="aid"; render(); }},["Edit"])])
+        ]);
+      }))
+    ]) : el("div", { class:"empty" }, ["No financial aid applications logged yet."])
+  ]);
+}
+
+/* ---------------------------------------------------------------- AWARDS & OUTCOMES */
+function viewAwards(){
+  var decided = STATE.scholarships.filter(function(s){ return s.status==="awarded" || s.status==="rejected"; });
+  var wr = winRate(STATE.scholarships);
+  return el("div", {}, [
+    el("h2", {}, ["Awards & outcomes"]),
+    el("p", { class:"hint" }, [wr===null ? "No decisions recorded yet." : "Win rate so far: "+wr+"% of decided applications."]),
+    el("div", { class:"card" }, decided.length ? [
+      el("table", {}, [
+        el("thead", {}, [el("tr", {}, [th("Scholarship"),th("Outcome"),th("Award"),th("Decided")])]),
+        el("tbody", {}, decided.map(function(s){
+          return el("tr", {}, [
+            td(s.name),
+            el("td",{},[el("span",{class:"pill "+(s.status==="awarded"?"ok":"out")},[s.status])]),
+            td(s.status==="awarded" ? money(s.awardAmount) : "—"),
+            td(s.decidedDate||"—")
+          ]);
+        }))
+      ])
+    ] : [el("div",{class:"empty"},["No scholarships decided yet — outcomes appear here once you mark one Awarded or Rejected."])])
+  ]);
+}
+
+/* ---------------------------------------------------------------- REPORTS */
+function viewReports(){
+  var rep = summaryReport(STATE);
+  var byStatus = scholarshipCountByStatus(STATE.scholarships);
+  return el("div", {}, [
+    el("h2", {}, ["Summary report"]),
+    el("p", { class:"hint" }, ["A snapshot across every scholarship and aid application tracked."]),
+    el("div", { class:"grid4" }, [
+      kpi("Scholarships tracked", String(rep.tracked), ""),
+      kpi("Potential award value", money(rep.potentialAward), "active applications only"),
+      kpi("Won so far", money(rep.won), rep.winRate===null?"—":rep.winRate+"% win rate"),
+      kpi("Financial aid submitted", String(rep.aidSubmitted), "of "+STATE.aidItems.length+" total")
+    ]),
+    el("div", { class:"card" }, [
+      el("h2", {}, ["By status"]),
+      Object.keys(byStatus).map(function(k){
+        var pctW = rep.tracked ? Math.max(4, Math.round((byStatus[k]/rep.tracked)*100)) : 4;
+        return el("div", { class:"barrow" }, [
+          el("div",{class:"lbl"},[k]),
+          el("div",{class:"track"},[el("div",{class:"fill", style:"width:"+pctW+"%"},[])]),
+          el("div",{class:"amt"},[byStatus[k]])
+        ]);
+      })
+    ])
+  ]);
+}
+
+/* ---------------------------------------------------------------- MODALS */
+function showModal(){
+  var bg = el("div", { class:"modal-bg" + (MODAL_OPEN ? " open" : "") }, []);
+  if(MODAL_OPEN === "scholarship") bg.appendChild(scholarshipModal());
+  else if(MODAL_OPEN === "requirement") bg.appendChild(requirementModal());
+  else if(MODAL_OPEN === "essay") bg.appendChild(essayModal());
+  else if(MODAL_OPEN === "aid") bg.appendChild(aidModal());
+  bg.addEventListener("click", function(e){ if(e.target === bg){ MODAL_OPEN=false; render(); } });
+  document.getElementById("app").appendChild(bg);
+}
+function field(labelText, inputEl){
+  return el("div", { class:"field" }, [el("label",{},[labelText]), inputEl]);
+}
+function closeModalBtn(){
+  return el("button", { class:"btn ghost", onclick:function(){ MODAL_OPEN=false; render(); } }, ["Cancel"]);
+}
+
+function scholarshipModal(){
+  var existing = EDIT_ID ? scholarshipById(STATE.scholarships, EDIT_ID) : null;
+  var draft = existing ? Object.assign({}, existing) : { id:uid(), name:"", provider:"", awardAmount:0, deadline:todayISO(), status:"researching", decidedDate:"", notes:"" };
+  return el("div", { class:"modal" }, [
+    el("h3", {}, [existing ? "Edit scholarship" : "Add scholarship"]),
+    field("Name", el("input",{value:draft.name, oninput:function(e){draft.name=e.target.value;}})),
+    field("Provider", el("input",{value:draft.provider, oninput:function(e){draft.provider=e.target.value;}})),
+    el("div", { class:"formgrid" }, [
+      field("Award amount ($)", el("input",{type:"number", value:draft.awardAmount, oninput:function(e){draft.awardAmount=Number(e.target.value)||0;}})),
+      field("Deadline", el("input",{type:"date", value:draft.deadline, oninput:function(e){draft.deadline=e.target.value;}}))
+    ]),
+    field("Status", el("select",{onchange:function(e){draft.status=e.target.value;}}, ["researching","started","submitted","awarded","rejected","expired"].map(function(s){ return el("option",{value:s, selected:draft.status===s?"selected":undefined},[s]); }))),
+    field("Notes", el("textarea",{rows:2, oninput:function(e){draft.notes=e.target.value;}}, [draft.notes])),
+    el("div", { class:"row" }, [
+      existing ? el("button", { class:"btn ghost", onclick:function(){ STATE.scholarships = STATE.scholarships.filter(function(s){return s.id!==existing.id;}); MODAL_OPEN=false; render(); } }, ["Delete"]) : el("span",{},[]),
+      el("div", {}, [closeModalBtn(), " ", el("button",{class:"btn", onclick:function(){
+        if(!draft.name) return;
+        if(existing){ STATE.scholarships = STATE.scholarships.map(function(s){ return s.id===existing.id ? draft : s; }); }
+        else{ if(demoLimitReached()) return; STATE.scholarships.push(draft); }
+        save(); MODAL_OPEN=false; render();
+      }},["Save"])])
+    ])
+  ]);
+}
+
+function requirementModal(){
+  var draft = { id:uid(), scholarshipId:(REQ_SCHOLARSHIP_ID || (STATE.scholarships[0]?STATE.scholarships[0].id:"")), text:"", done:false };
+  return el("div", { class:"modal" }, [
+    el("h3", {}, ["Add requirement"]),
+    field("Scholarship", el("select",{onchange:function(e){draft.scholarshipId=e.target.value;}}, STATE.scholarships.map(function(s){ return el("option",{value:s.id, selected:draft.scholarshipId===s.id?"selected":undefined},[s.name]); }))),
+    field("Requirement text", el("input",{value:draft.text, oninput:function(e){draft.text=e.target.value;}})),
+    el("div", { class:"row" }, [
+      el("span",{},[]),
+      el("div", {}, [closeModalBtn(), " ", el("button",{class:"btn", onclick:function(){
+        if(!draft.text || !draft.scholarshipId) return;
+        STATE.requirements.push(draft); save(); MODAL_OPEN=false; REQ_SCHOLARSHIP_ID=draft.scholarshipId; render();
+      }},["Add"])])
+    ])
+  ]);
+}
+
+function essayModal(){
+  var existing = EDIT_ID ? STATE.essays.filter(function(e){return e.id===EDIT_ID;})[0] : null;
+  var draft = existing ? Object.assign({}, existing) : { id:uid(), title:"", scholarshipIds:[], targetWords:500, currentWords:0, status:"outline", notes:"" };
+  var linkedId = (draft.scholarshipIds||[])[0] || "";
+  return el("div", { class:"modal" }, [
+    el("h3", {}, [existing ? "Edit essay" : "Add essay"]),
+    field("Title", el("input",{value:draft.title, oninput:function(e){draft.title=e.target.value;}})),
+    field("Linked scholarship", el("select",{onchange:function(e){draft.scholarshipIds=[e.target.value];}}, [el("option",{value:""},["(none)"])].concat(STATE.scholarships.map(function(s){ return el("option",{value:s.id, selected:linkedId===s.id?"selected":undefined},[s.name]); })))),
+    el("div", { class:"formgrid" }, [
+      field("Target words", el("input",{type:"number", value:draft.targetWords, oninput:function(e){draft.targetWords=Number(e.target.value)||0;}})),
+      field("Current words", el("input",{type:"number", value:draft.currentWords, oninput:function(e){draft.currentWords=Number(e.target.value)||0;}}))
+    ]),
+    field("Status", el("select",{onchange:function(e){draft.status=e.target.value;}}, ["outline","draft","final"].map(function(s){ return el("option",{value:s, selected:draft.status===s?"selected":undefined},[s]); }))),
+    el("div", { class:"row" }, [
+      existing ? el("button", { class:"btn ghost", onclick:function(){ STATE.essays = STATE.essays.filter(function(e){return e.id!==existing.id;}); MODAL_OPEN=false; render(); } }, ["Delete"]) : el("span",{},[]),
+      el("div", {}, [closeModalBtn(), " ", el("button",{class:"btn", onclick:function(){
+        if(!draft.title) return;
+        draft.scholarshipIds = draft.scholarshipIds.filter(Boolean);
+        if(existing){ STATE.essays = STATE.essays.map(function(e){ return e.id===existing.id ? draft : e; }); }
+        else{ STATE.essays.push(draft); }
+        save(); MODAL_OPEN=false; render();
+      }},["Save"])])
+    ])
+  ]);
+}
+
+function aidModal(){
+  var existing = EDIT_ID ? STATE.aidItems.filter(function(a){return a.id===EDIT_ID;})[0] : null;
+  var draft = existing ? Object.assign({}, existing) : { id:uid(), name:"", deadline:todayISO(), status:"not-started", notes:"" };
+  return el("div", { class:"modal" }, [
+    el("h3", {}, [existing ? "Edit aid application" : "Add aid application"]),
+    field("Name", el("input",{value:draft.name, oninput:function(e){draft.name=e.target.value;}})),
+    field("Deadline", el("input",{type:"date", value:draft.deadline, oninput:function(e){draft.deadline=e.target.value;}})),
+    field("Status", el("select",{onchange:function(e){draft.status=e.target.value;}}, ["not-started","in-progress","submitted","received"].map(function(s){ return el("option",{value:s, selected:draft.status===s?"selected":undefined},[s]); }))),
+    field("Notes", el("textarea",{rows:2, oninput:function(e){draft.notes=e.target.value;}}, [draft.notes])),
+    el("div", { class:"row" }, [
+      existing ? el("button", { class:"btn ghost", onclick:function(){ STATE.aidItems = STATE.aidItems.filter(function(a){return a.id!==existing.id;}); MODAL_OPEN=false; render(); } }, ["Delete"]) : el("span",{},[]),
+      el("div", {}, [closeModalBtn(), " ", el("button",{class:"btn", onclick:function(){
+        if(!draft.name) return;
+        if(existing){ STATE.aidItems = STATE.aidItems.map(function(a){ return a.id===existing.id ? draft : a; }); }
+        else{ STATE.aidItems.push(draft); }
+        save(); MODAL_OPEN=false; render();
+      }},["Save"])])
+    ])
+  ]);
+}
+
+render();
+})();
+</script>
+</body>
+</html>
